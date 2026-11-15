@@ -1,0 +1,41 @@
+# uk-short-term-let-regulations-2026
+
+> Structured, source-linked data on UK short-term let licensing (November 2026): Scotland licence by council (all 32 councils), Wales visitor accommodation registration, England short-term let register. Every record carries an official source URL and a last-checked date. Reference only, not legal advice.
+
+## Data
+
+- [Scotland — all 32 councils (JSON)](data/scotland-councils.json): licence required, control area, fee range, fine, planning note, source, last checked.
+- [Wales — 19 rules (JSON)](data/wales.json): registration deadline 2027-03-31 (free, Welsh Revenue Authority), late penalty £100, visitor levy £1.30/75p, licensing likely 2029, statutory default 4 March 2030, C3/C5/C6 planning, 252/182-day business rates tests.
+- [England — 11 rules (JSON)](data/england.json): national register expected March 2027 (not yet open), Greater London 90-night cap, planning case-by-case, 140/70-day business rates tests.
+- [Summary — all 62 records (CSV)](data/summary.csv)
+- [JSON Schema](data/schema.json): validates the three data files.
+
+## Docs
+
+- [How to use the data](docs/how-to-use.md): field definitions, examples, citation guidance.
+- [Sources](docs/sources.md): every official source, grouped by jurisdiction.
+- [Safety requirements (England)](docs/safety-requirements.md): fire, gas, electrical, insurance, EPC summaries.
+
+## Templates
+
+- [LodgingBusiness / BedAndBreakfast JSON-LD](templates/lodgingbusiness-jsonld.json): schema.org template with licenceNumber field (replace EXAMPLE- values).
+- [FAQPage JSON-LD](templates/faq-schema.json): 7 licensing questions.
+
+## Scripts
+
+- [Validation script](scripts/validate.py): `python3 scripts/validate.py` — checks all data files against the schema.
+- [Monthly update checklist](scripts/update-check.md): what to re-check each month (England register opening, Wales deadline).
+
+## Maintainer
+
+- [directbook.uk](https://directbook.uk/): commission-free direct-booking websites for UK B&Bs and holiday lets. Every site includes a visible licence / registration number field.
+- [UK short-term rental regulations — overview](https://directbook.uk/short-term-rental-regulations/)
+- [Scotland short-term let licence](https://directbook.uk/scotland-short-term-let-licence/)
+- [Wales holiday let registration](https://directbook.uk/wales-holiday-let-registration/)
+- [England short-term let register](https://directbook.uk/england-short-term-let-register/)
+
+## Notes
+
+- A `null` value means the official source has not published that figure — never an estimate.
+- `verification: direct-read` means the official page was opened and read; `search-verified` means the official page was quoted verbatim via search results.
+- Last updated: 2026-11-16. Version: v1.0.0.
