@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commission Savings Calculator — directbook.uk</title>
+<meta name="description" content="Work out how much a UK B&B or holiday let could save by moving bookings from an OTA to its own direct booking website. Free, runs entirely in your browser.">
+<style>
+  :root{--ink:#1c2b21;--muted:#5c6b60;--line:#d8e2da;--card:#f4f8f5;--accent:#2e7d32;--warn:#b45309}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);margin:0;padding:0;background:#fff;line-height:1.55}
+  .wrap{max-width:720px;margin:0 auto;padding:28px 20px 48px}
+  h1{font-size:26px;margin:0 0 6px}
+  h2{font-size:19px;margin:32px 0 8px}
+  p{margin:10px 0}
+  .sub{color:var(--muted);font-size:15px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:20px 0}
+  .field{margin:14px 0}
+  label{display:block;font-weight:600;margin-bottom:4px}
+  label small{font-weight:400;color:var(--muted)}
+  input{width:100%;padding:10px 12px;font-size:16px;border:1px solid #b9c6bc;border-radius:8px}
+  input:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .hint{font-size:13px;color:var(--muted);margin-top:4px}
+  button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:12px 22px;font-size:16px;font-weight:600;cursor:pointer}
+  button:hover{background:#256b29}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:15px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.total td{font-weight:700;border-top:2px solid var(--ink)}
+  .big{font-size:28px;font-weight:700;color:var(--accent);margin:6px 0}
+  .payback{font-size:19px;font-weight:700}
+  .nopay{color:var(--warn)}
+  .note{font-size:13.5px;color:var(--muted)}
+  .error{color:#b3261e;font-weight:600}
+  footer{border-top:1px solid var(--line);margin-top:32px;padding-top:14px;font-size:13px;color:var(--muted)}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>Commission Savings Calculator</h1>
+<p class="sub">How much could your B&amp;B or holiday let save by moving some bookings from an online travel agent (OTA) to your own direct booking website? Enter your own figures — the calculator only counts the bookings that actually move.</p>
+
+<div class="card" id="inputs">
+  <div class="field">
+    <label for="revenue">Annual revenue (£)</label>
+    <input type="number" id="revenue" min="0" step="100" value="40000" inputmode="decimal">
+    <div class="hint">Total yearly takings from bookings, before any fees.</div>
+  </div>
+  <div class="field">
+    <label for="otaRate">OTA commission rate (%) <small>— default 15%</small></label>
+    <input type="number" id="otaRate" min="0" max="100" step="0.1" value="15" inputmode="decimal">
+    <div class="hint">15% is an example rate, not a verified UK-wide standard. Use the rate on your own OTA contract or reservation statement.</div>
+  </div>
+  <div class="field">
+    <label for="shiftPct">Share of revenue moving to direct booking (%)</label>
+    <input type="number" id="shiftPct" min="0" max="100" step="1" value="33" inputmode="decimal">
+    <div class="hint">Only the bookings that actually move save commission. The rest keep paying platform fees.</div>
+  </div>
+  <div class="field">
+    <label for="avgBooking">Average booking value (£)</label>
+    <input type="number" id="avgBooking" min="0" step="10" value="400" inputmode="decimal">
+    <div class="hint">Used to count how many bookings the shifted revenue represents, because Stripe charges a fixed 20p per payment on top of the percentage.</div>
+  </div>
+  <div class="field">
+    <label for="stripePct">Stripe percentage fee (%) <small>— default 1.5%</small></label>
+    <input type="number" id="stripePct" min="0" max="100" step="0.1" value="1.5" inputmode="decimal">
+  </div>
+  <div class="field">
+    <label for="stripeFixed">Stripe fixed fee per payment (pence) <small>— default 20p</small></label>
+    <input type="number" id="stripeFixed" min="0" step="1" value="20" inputmode="decimal">
+    <div class="hint">1.5% + 20p is Stripe's published standard UK card rate. Other card categories, currencies, payment methods or custom pricing can cost more — check <a href="https://stripe.com/gb/pricing">stripe.com/gb/pricing</a>.</div>
+  </div>
+  <button type="button" id="calcBtn">Calculate savings</button>
+  <p class="error" id="errorMsg" role="alert" hidden></p>
+</div>
+
+<section id="results" aria-live="polite">
+  <h2>Your saving</h2>
+  <div class="card">
+    <div class="big" id="annualSaving">—</div>
+    <p style="margin-top:0">estimated saving per year</p>
+    <table>
+      <tr><td>Revenue moving to direct booking</td><td class="num" id="shiftedRevenue">—</td></tr>
+      <tr><td>Bookings moving to direct (approx.)</td><td class="num" id="bookingsMoved">—</td></tr>
+      <tr><td>OTA commission on those bookings</td><td class="num" id="otaCost">—</td></tr>
+      <tr><td>Stripe cost on those bookings</td><td class="num" id="stripeCost">—</td></tr>
+      <tr><td>&nbsp;&nbsp;of which percentage fee</td><td class="num" id="stripePctCost">—</td></tr>
+      <tr><td>&nbsp;&nbsp;of which fixed per-payment fee</td><td class="num" id="stripeFixedCost">—</td></tr>
+      <tr class="total"><td>Saving per year</td><td class="num" id="annualSavingRow">—</td></tr>
+      <tr><td>Saving over 3 years</td><td class="num" id="threeYearSaving">—</td></tr>
+      <tr><td>Saving per booking moved</td><td class="num" id="perBookingSaving">—</td></tr>
+    </table>
+    <h2 style="margin-top:24px">Payback on a £1,999 website build</h2>
+    <p class="payback" id="payback">—</p>
+    <p class="note" id="paybackNote">A directbook.uk hand-built direct booking website costs £1,999 once, with 0% commission on bookings. Payback months = £1,999 ÷ monthly saving, rounded up. A £9.90 hand-built demo comes first and carries a £9.90 voucher if you order the build, so you would pay £1,989.10 — the calculator uses the full £1,999 as the conservative figure.</p>
+  </div>
+</section>
+
+<h2>How the maths works</h2>
+<p><b>Saving = shifted revenue × (OTA rate − Stripe rate)</b>, where the Stripe cost is the percentage fee plus the fixed fee on every booking that moves:</p>
+<ul>
+  <li>Shifted revenue = annual revenue × share moving to direct booking</li>
+  <li>Bookings moved = shifted revenue ÷ average booking value</li>
+  <li>OTA cost = shifted revenue × OTA commission rate</li>
+  <li>Stripe cost = shifted revenue × Stripe percentage + bookings moved × fixed fee per payment</li>
+  <li>Annual saving = OTA cost − Stripe cost; 3-year saving = 3 × annual saving</li>
+  <li>Payback months = £1,999 ÷ (annual saving ÷ 12), rounded up to whole months</li>
+</ul>
+<p><b>Worked example (matches our guide):</b> on a £400 booking at a 15% OTA rate, the OTA takes £60.00; Stripe at 1.5% + 20p takes £6.20. The saving on that booking is £53.80 — roughly £54 per booking.</p>
+
+<h2>Assumptions — please read</h2>
+<ul>
+  <li><b>OTA rate is an example.</b> 15% is an assumed contract rate, not a verified UK-wide standard. Airbnb's host-only fee is 15.5% and Booking.com rates vary by contract; payment extras, partner programmes and discounts can push the effective cost higher. Use your own contract figures.</li>
+  <li><b>Stripe rate is for standard UK cards.</b> 1.5% + 20p is Stripe's published standard UK card rate. International cards, other payment methods and custom pricing differ.</li>
+  <li><b>Only shifted bookings save money.</b> Bookings that stay on an OTA keep paying platform fees. Nothing here assumes every booking moves.</li>
+  <li><b>Not the whole picture.</b> The saving is the difference between OTA commission and card processing only. A direct booking website also has build, domain, hosting, software and marketing costs, and your own time. Do not describe the full booking value as money you keep.</li>
+  <li><b>Revenue and shift share are your estimates.</b> The result is only as good as the numbers you enter.</li>
+</ul>
+
+<footer>
+  <p><b>Last checked: 2026-11-16.</b> Rates: OTA 15% example rate and Stripe 1.5% + 20p standard UK card rate, as used on <a href="https://directbook.uk/airbnb-vs-booking-com-fees-uk/">directbook.uk/airbnb-vs-booking-com-fees-uk/</a> and <a href="https://directbook.uk/bed-and-breakfast-website-cost-uk/">directbook.uk/bed-and-breakfast-website-cost-uk/</a>. Build price £1,999 one-time, demo £9.90, Care £499/year, AI voice receptionist £149/month — see <a href="https://directbook.uk/pricing/">directbook.uk/pricing/</a>.</p>
+  <p><b>Disclaimer:</b> this calculator is an illustration, not a guarantee and not financial advice. Actual savings depend on your contract rates, card mix, booking values and how many guests actually book direct. Confirm current rates with your OTA and with Stripe before making a decision.</p>
+  <p>Free to use and share. This file is self-contained — it needs no internet connection and sends nothing anywhere. Source: <a href="https://github.com/yasuo22/uk-short-term-let-regulations-2026">uk-short-term-let-regulations-2026</a> by <a href="https://directbook.uk/">directbook.uk</a>.</p>
+</footer>
+</main>
+
+<script>
+"use strict";
+/* CALC_FN_START */
+function calculateSavings(input) {
+  var revenue = Number(input.revenue);
+  var otaRate = Number(input.otaRate) / 100;
+  var shiftPct = Number(input.shiftPct) / 100;
+  var avgBooking = Number(input.avgBooking);
+  var stripePct = Number(input.stripePct) / 100;
+  var stripeFixed = Number(input.stripeFixed) / 100; // pence -> pounds
+
+  if (!isFinite(revenue) || revenue < 0) return { error: "Enter an annual revenue of £0 or more." };
+  if (!isFinite(otaRate) || otaRate < 0 || otaRate > 1) return { error: "Enter an OTA commission rate between 0% and 100%." };
+  if (!isFinite(shiftPct) || shiftPct < 0 || shiftPct > 1) return { error: "Enter a share moving to direct booking between 0% and 100%." };
+  if (!isFinite(avgBooking) || avgBooking <= 0) return { error: "Enter an average booking value greater than £0." };
+  if (!isFinite(stripePct) || stripePct < 0 || stripePct > 1) return { error: "Enter a Stripe percentage fee between 0% and 100%." };
+  if (!isFinite(stripeFixed) || stripeFixed < 0) return { error: "Enter a Stripe fixed fee of 0p or more." };
+
+  var shiftedRevenue = revenue * shiftPct;
+  var bookingsMoved = shiftedRevenue / avgBooking;
+  var otaCost = shiftedRevenue * otaRate;
+  var stripePctCost = shiftedRevenue * stripePct;
+  var stripeFixedCost = bookingsMoved * stripeFixed;
+  var stripeCost = stripePctCost + stripeFixedCost;
+  var annualSaving = otaCost - stripeCost;
+  var threeYearSaving = annualSaving * 3;
+  var monthlySaving = annualSaving / 12;
+  var perBookingSaving = bookingsMoved > 0 ? annualSaving / bookingsMoved : 0;
+
+  // Payback against the £1,999 one-time build fee. If the monthly saving is
+  // zero or negative there is no payback to show — never a negative or
+  // infinite month count.
+  var BUILD_FEE = 1999;
+  var paybackMonths = monthlySaving > 0 ? Math.ceil(BUILD_FEE / monthlySaving) : null;
+
+  return {
+    shiftedRevenue: shiftedRevenue,
+    bookingsMoved: bookingsMoved,
+    otaCost: otaCost,
+    stripePctCost: stripePctCost,
+    stripeFixedCost: stripeFixedCost,
+    stripeCost: stripeCost,
+    annualSaving: annualSaving,
+    threeYearSaving: threeYearSaving,
+    monthlySaving: monthlySaving,
+    perBookingSaving: perBookingSaving,
+    paybackMonths: paybackMonths,
+    buildFee: BUILD_FEE
+  };
+}
+/* CALC_FN_END */
+
+var gbp = new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" });
+function money(n) { return gbp.format(n); }
+function monthsText(m) {
+  if (m === 1) return "1 month";
+  if (m < 12) return m + " months";
+  var y = Math.floor(m / 12), r = m % 12;
+  var s = y === 1 ? "1 year" : y + " years";
+  if (r) s += " " + r + (r === 1 ? " month" : " months");
+  return s + " (" + m + " months)";
+}
+
+function run() {
+  var err = document.getElementById("errorMsg");
+  var res = calculateSavings({
+    revenue: document.getElementById("revenue").value,
+    otaRate: document.getElementById("otaRate").value,
+    shiftPct: document.getElementById("shiftPct").value,
+    avgBooking: document.getElementById("avgBooking").value,
+    stripePct: document.getElementById("stripePct").value,
+    stripeFixed: document.getElementById("stripeFixed").value
+  });
+  if (res.error) {
+    err.textContent = res.error;
+    err.hidden = false;
+    return;
+  }
+  err.hidden = true;
+  document.getElementById("annualSaving").textContent = money(res.annualSaving);
+  document.getElementById("shiftedRevenue").textContent = money(res.shiftedRevenue);
+  document.getElementById("bookingsMoved").textContent = res.bookingsMoved.toFixed(1);
+  document.getElementById("otaCost").textContent = money(res.otaCost);
+  document.getElementById("stripeCost").textContent = money(res.stripeCost);
+  document.getElementById("stripePctCost").textContent = money(res.stripePctCost);
+  document.getElementById("stripeFixedCost").textContent = money(res.stripeFixedCost);
+  document.getElementById("annualSavingRow").textContent = money(res.annualSaving);
+  document.getElementById("threeYearSaving").textContent = money(res.threeYearSaving);
+  document.getElementById("perBookingSaving").textContent = money(res.perBookingSaving);
+  var pb = document.getElementById("payback");
+  if (res.paybackMonths === null) {
+    pb.textContent = "At these figures the £1,999 build would not pay for itself — the monthly saving is £0 or less, so there is no payback period.";
+    pb.classList.add("nopay");
+  } else {
+    pb.textContent = "About " + monthsText(res.paybackMonths) + " to pay back the £1,999 build.";
+    pb.classList.remove("nopay");
+  }
+}
+
+document.getElementById("calcBtn").addEventListener("click", run);
+["revenue", "otaRate", "shiftPct", "avgBooking", "stripePct", "stripeFixed"].forEach(function (id) {
+  document.getElementById(id).addEventListener("input", run);
+});
+run();
+</script>
+</body>
+</html>

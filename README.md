@@ -28,8 +28,14 @@ Structured, source-linked data on **UK short term let licensing 2026** — cover
 | `docs/how-to-use.md` | How to use, cite and download the data |
 | `docs/sources.md` | Every official source, grouped by jurisdiction |
 | `docs/safety-requirements.md` | Fire, gas, electrical, insurance and EPC summaries (England) |
+| `docs/compliance-checklist.md` | Tick-box compliance checklist by jurisdiction (Scotland / Wales / England / general safety) |
+| `docs/jsonld-guide.md` | How to use the JSON-LD templates: placeholders, validation, Rich Results Test |
+| `tools/commission-savings-calculator.html` | Self-contained commission savings calculator (open in any browser, no internet needed) |
 | `templates/lodgingbusiness-jsonld.json` | `BedAndBreakfast` / `LodgingBusiness` JSON-LD template with `licenceNumber` |
 | `templates/faq-schema.json` | FAQPage JSON-LD template (7 licensing questions) |
+| `templates/hotel-jsonld.json` | `Hotel` JSON-LD template with `licenceNumber` |
+| `templates/howto-jsonld.json` | HowTo JSON-LD template: "How to apply for a Scotland short-term let licence" |
+| `templates/organization-jsonld.json` | `Organization` + `Service` JSON-LD template with `licenceNumber` placeholder |
 | `scripts/validate.py` | Validates all data files against the schema |
 | `scripts/update-check.md` | Monthly update checklist |
 | `llms.txt` | Machine-readable repo summary for AI tools |
@@ -66,6 +72,13 @@ We build the websites this dataset describes the rules for. Our guides go deeper
 Every site we build includes a visible licence / registration number field, so you can display your credentials. Displaying the number is not the same as holding the licence: planning permission, licensing and safety compliance remain your responsibility. See [pricing](https://directbook.uk/pricing/).
 
 ## Changelog
+
+### v1.1.0 — unreleased
+
+- New: commission savings calculator (`tools/commission-savings-calculator.html`) — self-contained HTML/JS, no backend or external dependencies. Annual and 3-year saving plus payback months against the £1,999 one-time build fee; OTA 15% is an example rate and Stripe is 1.5% + 20p per payment for standard UK cards.
+- New: three JSON-LD templates — `Hotel`, HowTo ("How to apply for a Scotland short-term let licence", steps from the published Scotland guide), and `Organization` + `Service` — plus a usage guide (`docs/jsonld-guide.md`).
+- New: compliance checklist (`docs/compliance-checklist.md`) — tick-box list by jurisdiction, every item sourced from the data files or an official page.
+- `scripts/validate.py` now also checks the three new template files as valid JSON.
 
 ### v1.0.0 — 2026-11-16
 

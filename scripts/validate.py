@@ -27,6 +27,9 @@ SCHEMA_FILE = ROOT / "data" / "schema.json"
 TEMPLATE_FILES = [
     ROOT / "templates" / "lodgingbusiness-jsonld.json",
     ROOT / "templates" / "faq-schema.json",
+    ROOT / "templates" / "hotel-jsonld.json",
+    ROOT / "templates" / "howto-jsonld.json",
+    ROOT / "templates" / "organization-jsonld.json",
 ]
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 

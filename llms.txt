@@ -15,11 +15,20 @@
 - [How to use the data](docs/how-to-use.md): field definitions, examples, citation guidance.
 - [Sources](docs/sources.md): every official source, grouped by jurisdiction.
 - [Safety requirements (England)](docs/safety-requirements.md): fire, gas, electrical, insurance, EPC summaries.
+- [Compliance checklist](docs/compliance-checklist.md): tick-box checklist by jurisdiction (Scotland / Wales / England / general safety), every item sourced.
+- [JSON-LD guide](docs/jsonld-guide.md): how to use the templates, replace placeholders, validate with Google's Rich Results Test.
+
+## Tools
+
+- [Commission savings calculator](tools/commission-savings-calculator.html): self-contained HTML/JS, no backend. Annual and 3-year saving plus payback months against the £1,999 one-time build fee; OTA 15% example rate, Stripe 1.5% + 20p standard UK cards.
 
 ## Templates
 
 - [LodgingBusiness / BedAndBreakfast JSON-LD](templates/lodgingbusiness-jsonld.json): schema.org template with licenceNumber field (replace EXAMPLE- values).
 - [FAQPage JSON-LD](templates/faq-schema.json): 7 licensing questions.
+- [Hotel JSON-LD](templates/hotel-jsonld.json): schema.org Hotel template with licenceNumber field.
+- [HowTo JSON-LD](templates/howto-jsonld.json): "How to apply for a Scotland short-term let licence" steps.
+- [Organization + Service JSON-LD](templates/organization-jsonld.json): business template with licenceNumber placeholder and published directbook.uk prices.
 
 ## Scripts
 
@@ -38,4 +47,4 @@
 
 - A `null` value means the official source has not published that figure — never an estimate.
 - `verification: direct-read` means the official page was opened and read; `search-verified` means the official page was quoted verbatim via search results.
-- Last updated: 2026-11-16. Version: v1.0.0.
+- Last updated: 2026-11-16. Version: v1.1.0 (unreleased; v1.0.0 released 2026-11-16).
